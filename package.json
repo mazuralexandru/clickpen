@@ -1,5 +1,5 @@
 {
-  "name": "skibidi",
+  "name": "clickpen",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,19 +9,34 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@codemirror/commands": "^6.8.0",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.9",
+    "@codemirror/lang-javascript": "^6.2.3",
+    "@codemirror/language": "^6.11.0",
+    "@codemirror/state": "^6.5.2",
+    "@codemirror/theme-one-dark": "^6.1.2",
+    "@codemirror/view": "^6.36.4",
+    "@uiw/react-codemirror": "^4.23.10",
+    "diff": "^7.0.0",
+    "next": "15.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "next": "15.2.2"
+    "react-markdown": "^10.1.0",
+    "react-resizable-panels": "^2.1.7",
+    "react-split": "^2.0.14",
+    "split.js": "^1.6.5"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@eslint/eslintrc": "^3",
+    "@tailwindcss/postcss": "^4",
+    "@types/diff": "^7.0.1",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@tailwindcss/postcss": "^4",
-    "tailwindcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",
-    "@eslint/eslintrc": "^3"
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

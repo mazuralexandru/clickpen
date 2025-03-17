@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ClickPen - Interactive CSS Learning Platform
+
+ClickPen is an interactive web-based platform for learning CSS through live examples and real-time code editing. Inspired by CodePen but focused on educational content, ClickPen lets you efficiently click and swipe through different CSS examples while experimenting with the code in real-time. The name "ClickPen" represents the seamless experience of clicking through examples while having a powerful code editor (pen) at your disposal.
+
+## Features
+
+- **Live Code Editor**: Write and preview HTML, CSS, and JavaScript in real-time
+- **Split-screen Interface**: Side-by-side code editor and preview pane
+- **Interactive Examples**: Learn by modifying working code examples
+- **Comprehensive CSS Coverage**: Full CSS property reference implementation
+- **Efficient Navigation**: Quick click-through system for browsing examples
+- **Instant Preview**: See your changes as you type
+
+## Example/Slide Format
+
+Each example in ClickPen follows a specific JSON format:
+
+```json
+{
+  "exampleN": {
+    "explanation": "### Title\n\nMarkdown-formatted explanation with:\n\n* Bullet points\n* Code snippets using `backticks`\n* Detailed property descriptions",
+    "html": "<!-- HTML code for the example -->",
+    "css": "/* CSS code for the example */",
+    "javascript": "// Optional JavaScript code"
+  }
+}
+```
+
+Required fields for each example:
+- `explanation`: Markdown-formatted text explaining the concept
+- `html`: HTML code demonstrating the concept
+- `css`: CSS code showing the implementation
+- `javascript`: Optional JavaScript code (can be empty string)
+
+## Roadmap Content Structure
+
+The platform implements a comprehensive CSS learning path, organized by topics:
+- Selectors
+- Colors
+- Typography
+- Box Model
+- Display Properties
+- Positioning
+- Flexbox
+- Grid
+- Animations
+- And many more...
+
+Each topic is broken down into specific properties and concepts, allowing for detailed exploration and practice.
 
 ## Getting Started
 
-First, run the development server:
-
+1. Clone the repository
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone [repository-url]
+cd clickpen
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Start the development server
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open your browser and navigate to `http://localhost:3000`
 
-## Learn More
+## Contributing
 
-To learn more about Next.js, take a look at the following resources:
+### Adding New Examples
+To add a new example, follow the example format in the tutorial.json file:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Create a new entry with a unique example ID
+2. Include all required fields (explanation, html, css)
+3. Format the explanation using Markdown
+4. Ensure code examples are properly formatted and functional
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is licensed under the MIT License - see the LICENSE file for details.
