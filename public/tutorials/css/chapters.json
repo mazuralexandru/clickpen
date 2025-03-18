@@ -1,0 +1,113 @@
+{
+    "chapters": [
+      {
+        "name": "CSS Fundamentals",
+        "path": "css/chapter1-fundamentals/",
+        "lessons": [
+          {
+            "title": "Introduction to CSS: What CSS is and its role in web development",
+            "path": "introduction-to-css.json"
+          },
+          {
+            "title": "CSS Syntax: Selectors, properties, values, and declarations",
+            "path": "css-syntax.json"
+          },
+          {
+            "title": "Adding CSS to HTML: Inline, internal, and external stylesheets",
+            "path": "adding-css-to-html.json"
+          },
+          {
+            "title": "CSS Comments: How to write and use comments in CSS",
+            "path": "css-comments.json"
+          },
+          {
+            "title": "CSS Reset vs Normalize: Understanding different approaches to consistent styling",
+            "path": "css-reset-vs-normalize.json"
+          },
+          {
+            "title": "CSS Units: px, em, rem, vh, vw, %, pt understanding measurement units",
+            "path": "css-units.json"
+          },
+          {
+            "title": "CSS Color Systems: HEX, RGB, RGBA, HSL, HSLA, and named colors",
+            "path": "css-color-systems.json"
+          },
+          {
+            "title": "CSS Specificity: Understanding how the browser determines which styles to apply",
+            "path": "css-specificity.json"
+          },
+          {
+            "title": "CSS Cascading: How the cascade algorithm works and its importance in CSS",
+            "path": "css-cascading.json"
+          },
+          {
+            "title": "CSS Inheritance: Which properties are inherited and which are not",
+            "path": "css-inheritance.json"
+          }
+        ]
+      },
+      {
+        "name": "CSS Selectors",
+        "path": "css/chapter2-selectors/",
+        "lessons": [
+          {
+            "title": "Basic Selectors: Element, class, and ID selectors",
+            "path": "basic-selectors.json"
+          },
+          {
+            "title": "Attribute Selectors: Targeting elements based on their attributes",
+            "path": "attribute-selectors.json"
+          },
+          {
+            "title": "Pseudo-classes: :hover, :active, :focus, :visited, :nth-child(), :first-child, :last-child",
+            "path": "pseudo-classes.json"
+          },
+          {
+            "title": "Structural Pseudo-classes: :empty, :only-child, :only-of-type, :first-of-type, :last-of-type",
+            "path": "structural-pseudo-classes.json"
+          },
+          {
+            "title": "Form Pseudo-classes: :checked, :disabled, :enabled, :required, :optional, :valid, :invalid",
+            "path": "form-pseudo-classes.json"
+          },
+          {
+            "title": "Negation Pseudo-class: :not() selector",
+            "path": "negation-pseudo-class.json"
+          },
+          {
+            "title": "UI State Pseudo-classes: :default, :valid, :invalid, :in-range, :out-of-range",
+            "path": "ui-state-pseudo-classes.json"
+          },
+          {
+            "title": "Target Pseudo-class: :target selector for elements that are the target of a URL fragment",
+            "path": "target-pseudo-class.json"
+          },
+          {
+            "title": "Language Pseudo-class: :lang() for targeting elements based on language",
+            "path": "language-pseudo-class.json"
+          },
+          {
+            "title": "Pseudo-elements: ::before, ::after, ::first-letter, ::first-line, ::selection",
+            "path": "pseudo-elements.json"
+          },
+          {
+            "title": "Combinators: Descendant, child, adjacent sibling, and general sibling selectors",
+            "path": "combinators.json"
+          },
+          {
+            "title": "Multiple Selectors: Grouping selectors with commas",
+            "path": "multiple-selectors.json"
+          },
+          {
+            "title": "Universal Selector: The * selector and its applications",
+            "path": "universal-selector.json"
+          },
+          {
+            "title": "Advanced Attribute Selectors: [attr^=], [attr$=], [attr*=], [attr~=], [attr|=]",
+            "path": "advanced-attribute-selectors.json"
+          }
+        ]
+      }
+    ]
+  }
+  
