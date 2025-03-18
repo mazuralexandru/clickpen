@@ -37,7 +37,10 @@ export default function CodePlayground({
   const [showFullHtml, setShowFullHtml] = useState(false);
   const [currentExample, setCurrentExample] = useState<number | null>(null);
   const [markdownContent, setMarkdownContent] = useState(initialMarkdownContent);
-  const examples = Object.entries(tutorialData);
+  const [showEditors, setShowEditors] = useState(true);
+
+  // Access tutorial data
+  const { title, introduction, examples } = tutorialData;
 
   // Debounce function
   const debounce = (func: Function, wait: number) => {
@@ -108,52 +111,90 @@ export default function CodePlayground({
   // Start tutorial function
   const startTutorial = () => {
     setCurrentExample(0);
-    const firstExample = examples[0][1];
+    setMarkdownContent(introduction);
     
-    // Update both refs and state
-    htmlCodeRef.current = firstExample.html;
-    cssCodeRef.current = firstExample.css;
-    jsCodeRef.current = firstExample.javascript;
+    // Clear code editors for introduction but keep them visible
+    htmlCodeRef.current = '';
+    cssCodeRef.current = '';
+    jsCodeRef.current = '';
     
-    setHtmlCode(firstExample.html);
-    setCssCode(firstExample.css);
-    setJsCode(firstExample.javascript);
-    setMarkdownContent(`# Example ${1} of ${examples.length}\n\n${firstExample.explanation}`);
+    setHtmlCode('');
+    setCssCode('');
+    setJsCode('');
   };
 
   // Navigation functions
   const goToPreviousExample = () => {
-    if (currentExample !== null && currentExample > 0) {
-      const prevIndex = currentExample - 1;
-      setCurrentExample(prevIndex);
-      const example = examples[prevIndex][1];
+    if (currentExample === null) return;
+    
+    if (currentExample === 0) {
+      // Already at introduction, can't go back
+      return;
+    }
+    
+    const prevIndex = currentExample - 1;
+    setCurrentExample(prevIndex);
+    
+    if (prevIndex === 0) {
+      // Going back to introduction
+      setMarkdownContent(introduction || '');
       
-      htmlCodeRef.current = example.html;
-      cssCodeRef.current = example.css;
-      jsCodeRef.current = example.javascript;
+      // Clear code editors but keep them visible
+      htmlCodeRef.current = '';
+      cssCodeRef.current = '';
+      jsCodeRef.current = '';
       
-      setHtmlCode(example.html);
-      setCssCode(example.css);
-      setJsCode(example.javascript);
-      setMarkdownContent(`# Example ${prevIndex + 1} of ${examples.length}\n\n${example.explanation}`);
+      setHtmlCode('');
+      setCssCode('');
+      setJsCode('');
+    } else {
+      // Going to previous example
+      const example = examples[prevIndex - 1];
+      
+      htmlCodeRef.current = example.html || '';
+      cssCodeRef.current = example.css || '';
+      jsCodeRef.current = example.javascript || '';
+      
+      setHtmlCode(example.html || '');
+      setCssCode(example.css || '');
+      setJsCode(example.javascript || '');
+      setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
     }
   };
 
   const goToNextExample = () => {
-    if (currentExample !== null && currentExample < examples.length - 1) {
-      const nextIndex = currentExample + 1;
-      setCurrentExample(nextIndex);
-      const example = examples[nextIndex][1];
+    if (currentExample === null) return;
+    
+    const nextIndex = currentExample + 1;
+    
+    if (currentExample === 0) {
+      // Moving from introduction to first example
+      const example = examples[0];
+      setShowEditors(true);
       
-      htmlCodeRef.current = example.html;
-      cssCodeRef.current = example.css;
-      jsCodeRef.current = example.javascript;
+      htmlCodeRef.current = example.html || '';
+      cssCodeRef.current = example.css || '';
+      jsCodeRef.current = example.javascript || '';
       
-      setHtmlCode(example.html);
-      setCssCode(example.css);
-      setJsCode(example.javascript);
-      setMarkdownContent(`# Example ${nextIndex + 1} of ${examples.length}\n\n${example.explanation}`);
+      setHtmlCode(example.html || '');
+      setCssCode(example.css || '');
+      setJsCode(example.javascript || '');
+      setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
+    } else if (nextIndex <= examples.length) {
+      // Moving to next example
+      const example = examples[nextIndex - 1];
+      
+      htmlCodeRef.current = example.html || '';
+      cssCodeRef.current = example.css || '';
+      jsCodeRef.current = example.javascript || '';
+      
+      setHtmlCode(example.html || '');
+      setCssCode(example.css || '');
+      setJsCode(example.javascript || '');
+      setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
     }
+    
+    setCurrentExample(nextIndex);
   };
 
   // Add keyboard navigation handler
@@ -240,11 +281,11 @@ export default function CodePlayground({
                         ←
                       </button>
                       <span className="text-xs">
-                        Example {currentExample + 1} of {examples.length}
+                        {currentExample === 0 ? 'Introduction' : `Example ${currentExample} of ${examples.length}`}
                       </span>
                       <button 
                         onClick={goToNextExample}
-                        disabled={currentExample === examples.length - 1}
+                        disabled={currentExample >= examples.length}
                         className="text-xs px-2 py-1 rounded bg-[#2c313a] hover:bg-[#353b45] disabled:opacity-50"
                       >
                         →
