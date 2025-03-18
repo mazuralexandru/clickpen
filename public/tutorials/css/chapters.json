@@ -2,7 +2,7 @@
     "chapters": [
       {
         "name": "CSS Fundamentals",
-        "path": "css/chapter1-fundamentals/",
+        "path": "css/chapter-1-fundamentals/",
         "lessons": [
           {
             "title": "Introduction to CSS: What CSS is and its role in web development",
@@ -48,7 +48,7 @@
       },
       {
         "name": "CSS Selectors",
-        "path": "css/chapter2-selectors/",
+        "path": "css/chapter-2-selectors/",
         "lessons": [
           {
             "title": "Basic Selectors: Element, class, and ID selectors",

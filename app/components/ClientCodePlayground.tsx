@@ -19,13 +19,13 @@ export default function ClientCodePlayground() {
   </style>
 </head>
 <body>
-  <div>Hello!</div>
+  <div>Hello! Select a tutorial to get started.</div>
   <script id="Javascript">
     // Your Javascript is inserted here
   </script>
 </body>
 </html>`;
-  const initialCssCode = 'h1 {\n  color: blue;\n}';
+  const initialCssCode = 'body {\n  font-family: sans-serif;\n  padding: 20px;\n}';
   const initialJsCode = '// Your JavaScript code here';
 
   return (

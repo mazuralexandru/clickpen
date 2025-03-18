@@ -5,8 +5,8 @@ import PreviewPane from './PreviewPane';
 import HtmlEditor from './HtmlEditor';
 import CssEditor from './CssEditor';
 import JsEditor from './JsEditor';
-import tutorialData from './tutorial.json';
 import MarkdownPreview from './MarkdownPreview';
+import TutorialNavigation from './TutorialNavigation';
 
 interface CodePlaygroundProps {
   initialHtml: string;
@@ -15,26 +15,53 @@ interface CodePlaygroundProps {
   initialMarkdownContent?: string;
 }
 
+interface TutorialData {
+  examples: Array<{
+    title: string;
+    html: string;
+    css: string;
+    javascript: string;
+    explanation: string;
+  }>;
+  title?: string;
+  introduction?: string;
+}
+
+interface Chapter {
+  name: string;
+  path: string;
+  lessons: Lesson[];
+}
+
+interface Lesson {
+  title: string;
+  path: string;
+}
+
 export default function CodePlayground({
   initialHtml,
   initialCssCode,
   initialJsCode,
-  initialMarkdownContent = '# Welcome to the Tutorial\nClick "Start Tutorial" to begin learning!'
+  initialMarkdownContent = '# Welcome to the Tutorial\nSelect a tutorial from the dropdown to begin learning!'
 }: CodePlaygroundProps) {
   // Refs for immediate preview updates
   const htmlRef = useRef(initialHtml);
   const cssCodeRef = useRef(initialCssCode);
   const jsCodeRef = useRef(initialJsCode);
-
+  
   // State for editor display (debounced updates)
   const [htmlCode, setHtmlCode] = useState(initialHtml);
   const [cssCode, setCssCode] = useState(initialCssCode);
   const [jsCode, setJsCode] = useState(initialJsCode);
   const [currentExample, setCurrentExample] = useState<number | null>(null);
   const [markdownContent, setMarkdownContent] = useState(initialMarkdownContent);
-
-  // Access tutorial data
-  const { title, introduction, examples } = tutorialData;
+  
+  // New state for tutorial navigation
+  const [tutorialData, setTutorialData] = useState<TutorialData | null>(null);
+  const [currentChapter, setCurrentChapter] = useState<string | undefined>();
+  const [currentLesson, setCurrentLesson] = useState<string | undefined>();
+  const [isLoading, setIsLoading] = useState(false);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
 
   // Debounce function
   const debounce = (func: Function, wait: number) => {
@@ -55,105 +82,127 @@ export default function CodePlayground({
     htmlRef.current = value;
     debouncedSetHtmlCode(value);
   }, []);
-
+  
   const handleCssChange = useCallback((value: string) => {
     cssCodeRef.current = value;
     debouncedSetCssCode(value);
   }, []);
-
+  
   const handleJsChange = useCallback((value: string) => {
     jsCodeRef.current = value;
     debouncedSetJsCode(value);
   }, []);
 
-  // Load content from clipboard
-  const loadFromClipboard = async () => {
+  // Fetch chapters data
+  useEffect(() => {
+    const fetchChapters = async () => {
+      try {
+        const response = await fetch('/tutorials/css/chapters.json');
+        const data = await response.json();
+        setChapters(data.chapters);
+      } catch (error) {
+        console.error('Error loading chapters:', error);
+      }
+    };
+    fetchChapters();
+  }, []);
+
+  // Load the next lesson when reaching the end of the current lesson
+  const loadNextLesson = useCallback(() => {
+    if (!currentChapter || !currentLesson || chapters.length === 0) return false;
+    
+    const currentChapterIndex = chapters.findIndex(chapter => chapter.path === currentChapter);
+    if (currentChapterIndex === -1) return false;
+    
+    const currentChapterData = chapters[currentChapterIndex];
+    const currentLessonIndex = currentChapterData.lessons.findIndex(lesson => lesson.path === currentLesson);
+    if (currentLessonIndex === -1) return false;
+    
+    // If there's another lesson in the current chapter
+    if (currentLessonIndex < currentChapterData.lessons.length - 1) {
+      const nextLesson = currentChapterData.lessons[currentLessonIndex + 1];
+      loadTutorial(currentChapterData.path, nextLesson.path);
+      return true;
+    } 
+    // If there's another chapter
+    else if (currentChapterIndex < chapters.length - 1) {
+      const nextChapter = chapters[currentChapterIndex + 1];
+      if (nextChapter.lessons.length > 0) {
+        const nextLesson = nextChapter.lessons[0];
+        loadTutorial(nextChapter.path, nextLesson.path);
+        return true;
+      }
+    }
+    
+    return false;
+  }, [currentChapter, currentLesson, chapters]);
+
+  // Load tutorial data from a specific lesson
+  const loadTutorial = useCallback(async (chapterPath: string, lessonPath: string) => {
+    setIsLoading(true);
     try {
-      const clipboardText = await navigator.clipboard.readText();
-      const parsedData = JSON.parse(clipboardText);
+      const response = await fetch(`/tutorials/${chapterPath}${lessonPath}`);
+      const data: TutorialData = await response.json();
+      setTutorialData(data);
+      setCurrentChapter(chapterPath);
+      setCurrentLesson(lessonPath);
       
-      if (parsedData.HTML !== undefined && 
-          parsedData.CSS !== undefined && 
-          parsedData.JS !== undefined) {
-        // Update both refs and state
-        htmlRef.current = parsedData.HTML;
-        cssCodeRef.current = parsedData.CSS;
-        jsCodeRef.current = parsedData.JS;
+      // Skip intro and start with the first example directly
+      if (data.examples && data.examples.length > 0) {
+        setCurrentExample(1);
         
-        setHtmlCode(parsedData.HTML);
-        setCssCode(parsedData.CSS);
-        setJsCode(parsedData.JS);
-      } else {
-        alert('Invalid JSON format. Expected {"HTML": "...", "CSS": "...", "JS": "..."}');
+        const example = data.examples[0];
+        htmlRef.current = example.html || '';
+        cssCodeRef.current = example.css || '';
+        jsCodeRef.current = example.javascript || '';
+        
+        setHtmlCode(example.html || '');
+        setCssCode(example.css || '');
+        setJsCode(example.javascript || '');
+        setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
       }
     } catch (error) {
-      alert('Failed to load from clipboard. Make sure you have valid JSON copied.');
-      console.error(error);
+      console.error('Error loading tutorial:', error);
+      setMarkdownContent('# Error\nFailed to load the selected tutorial. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  // Start tutorial function
-  const startTutorial = () => {
-    setCurrentExample(0);
-    setMarkdownContent(introduction);
-    
-    // Clear code editors for introduction
-    htmlRef.current = '';
-    cssCodeRef.current = '';
-    jsCodeRef.current = '';
-    
-    setHtmlCode('');
-    setCssCode('');
-    setJsCode('');
-  };
+  }, []);
 
   // Navigation functions
-  const goToPreviousExample = () => {
-    if (currentExample === null) return;
+  const goToPreviousExample = useCallback(() => {
+    if (currentExample === null || !tutorialData) return;
     
-    if (currentExample === 0) {
-      // Already at introduction, can't go back
+    if (currentExample <= 1) {
+      // Already at first example, can't go back further
       return;
     }
     
     const prevIndex = currentExample - 1;
     setCurrentExample(prevIndex);
     
-    if (prevIndex === 0) {
-      // Going back to introduction
-      setMarkdownContent(introduction || '');
-      
-      // Clear code editors
-      htmlRef.current = '';
-      cssCodeRef.current = '';
-      jsCodeRef.current = '';
-      
-      setHtmlCode('');
-      setCssCode('');
-      setJsCode('');
-    } else {
-      // Going to previous example
-      const example = examples[prevIndex - 1];
-      
-      htmlRef.current = example.html || '';
-      cssCodeRef.current = example.css || '';
-      jsCodeRef.current = example.javascript || '';
-      
-      setHtmlCode(example.html || '');
-      setCssCode(example.css || '');
-      setJsCode(example.javascript || '');
-      setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
-    }
-  };
+    // Load the previous example
+    const example = tutorialData.examples[prevIndex - 1];
+    
+    htmlRef.current = example.html || '';
+    cssCodeRef.current = example.css || '';
+    jsCodeRef.current = example.javascript || '';
+    
+    setHtmlCode(example.html || '');
+    setCssCode(example.css || '');
+    setJsCode(example.javascript || '');
+    setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
+  }, [currentExample, tutorialData]);
 
-  const goToNextExample = () => {
-    if (currentExample === null) return;
+  const goToNextExample = useCallback(() => {
+    if (currentExample === null || !tutorialData) return;
     
-    const nextIndex = currentExample + 1;
-    
-    if (currentExample === 0) {
-      // Moving from introduction to first example
-      const example = examples[0];
+    if (currentExample < tutorialData.examples.length) {
+      // Move to the next example in the current lesson
+      const nextIndex = currentExample + 1;
+      setCurrentExample(nextIndex);
+      
+      const example = tutorialData.examples[nextIndex - 1];
       
       htmlRef.current = example.html || '';
       cssCodeRef.current = example.css || '';
@@ -163,21 +212,15 @@ export default function CodePlayground({
       setCssCode(example.css || '');
       setJsCode(example.javascript || '');
       setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
-    } else if (nextIndex <= examples.length) {
-      // Moving to next example
-      const example = examples[nextIndex - 1];
-      
-      htmlRef.current = example.html || '';
-      cssCodeRef.current = example.css || '';
-      jsCodeRef.current = example.javascript || '';
-      
-      setHtmlCode(example.html || '');
-      setCssCode(example.css || '');
-      setJsCode(example.javascript || '');
-      setMarkdownContent(`# ${example.title}\n\n${example.explanation || ''}`);
+    } else {
+      // We're at the end of this lesson, try to load the next lesson
+      loadNextLesson();
     }
-    
-    setCurrentExample(nextIndex);
+  }, [currentExample, tutorialData, loadNextLesson]);
+
+  // Handle tutorial selection
+  const handleSelectLesson = (chapterPath: string, lessonPath: string) => {
+    loadTutorial(chapterPath, lessonPath);
   };
 
   // Add keyboard navigation handler
@@ -193,7 +236,6 @@ export default function CodePlayground({
         }
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentExample, goToPreviousExample, goToNextExample]);
@@ -243,43 +285,46 @@ export default function CodePlayground({
             dragInterval={1}
           >
             <div className="h-full overflow-hidden">
-              <div className="text-sm p-2 font-medium bg-[#21252b]">
+              <div className="text-sm p-2 font-medium bg-[#21252b] flex justify-between items-center">
                 <span>Markdown Preview</span>
+                <TutorialNavigation 
+                  onSelectLesson={handleSelectLesson}
+                  currentChapter={currentChapter}
+                  currentLesson={currentLesson}
+                />
               </div>
-              <MarkdownPreview markdownContent={markdownContent} />
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center bg-white text-black">
+                  <p>Loading tutorial...</p>
+                </div>
+              ) : (
+                <MarkdownPreview markdownContent={markdownContent} />
+              )}
             </div>
             <div className="h-full overflow-hidden">
               <div className="text-sm p-2 font-medium bg-[#21252b] flex justify-between items-center">
                 <span>Preview</span>
                 <div className="flex items-center gap-2">
-                  {currentExample !== null && (
+                  {tutorialData && currentExample !== null && (
                     <>
                       <button 
                         onClick={goToPreviousExample}
-                        disabled={currentExample === 0}
+                        disabled={currentExample <= 1}
                         className="text-xs px-2 py-1 rounded bg-[#2c313a] hover:bg-[#353b45] disabled:opacity-50"
                       >
                         ←
                       </button>
                       <span className="text-xs">
-                        {currentExample === 0 ? 'Introduction' : `Example ${currentExample} of ${examples.length}`}
+                        {`Example ${currentExample} of ${tutorialData.examples.length}`}
                       </span>
                       <button 
                         onClick={goToNextExample}
-                        disabled={currentExample >= examples.length}
-                        className="text-xs px-2 py-1 rounded bg-[#2c313a] hover:bg-[#353b45] disabled:opacity-50"
+                        disabled={false} // Never disable, it will go to next lesson
+                        className="text-xs px-2 py-1 rounded bg-[#2c313a] hover:bg-[#353b45]"
                       >
                         →
                       </button>
                     </>
-                  )}
-                  {currentExample === null && (
-                    <button 
-                      onClick={startTutorial}
-                      className="text-xs px-2 py-1 rounded bg-[#2c313a] hover:bg-[#353b45]"
-                    >
-                      Start Tutorial
-                    </button>
                   )}
                 </div>
               </div>
