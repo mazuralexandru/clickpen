@@ -9,35 +9,29 @@ import tutorialData from './tutorial.json';
 import MarkdownPreview from './MarkdownPreview';
 
 interface CodePlaygroundProps {
-  initialHtmlStructure: string;
-  initialHtmlCode: string;
+  initialHtml: string;
   initialCssCode: string;
   initialJsCode: string;
   initialMarkdownContent?: string;
 }
 
 export default function CodePlayground({
-  initialHtmlStructure,
-  initialHtmlCode,
+  initialHtml,
   initialCssCode,
   initialJsCode,
   initialMarkdownContent = '# Welcome to the Tutorial\nClick "Start Tutorial" to begin learning!'
 }: CodePlaygroundProps) {
   // Refs for immediate preview updates
-  const htmlStructureRef = useRef(initialHtmlStructure);
-  const htmlCodeRef = useRef(initialHtmlCode);
+  const htmlRef = useRef(initialHtml);
   const cssCodeRef = useRef(initialCssCode);
   const jsCodeRef = useRef(initialJsCode);
 
   // State for editor display (debounced updates)
-  const [htmlStructure, setHtmlStructure] = useState(initialHtmlStructure);
-  const [htmlCode, setHtmlCode] = useState(initialHtmlCode);
+  const [htmlCode, setHtmlCode] = useState(initialHtml);
   const [cssCode, setCssCode] = useState(initialCssCode);
   const [jsCode, setJsCode] = useState(initialJsCode);
-  const [showFullHtml, setShowFullHtml] = useState(false);
   const [currentExample, setCurrentExample] = useState<number | null>(null);
   const [markdownContent, setMarkdownContent] = useState(initialMarkdownContent);
-  const [showEditors, setShowEditors] = useState(true);
 
   // Access tutorial data
   const { title, introduction, examples } = tutorialData;
@@ -52,21 +46,15 @@ export default function CodePlayground({
   };
 
   // Debounced state setters
-  const debouncedSetHtmlStructure = useCallback(debounce(setHtmlStructure, 500), []);
   const debouncedSetHtmlCode = useCallback(debounce(setHtmlCode, 500), []);
   const debouncedSetCssCode = useCallback(debounce(setCssCode, 500), []);
   const debouncedSetJsCode = useCallback(debounce(setJsCode, 500), []);
 
   // Change handlers
   const handleHtmlChange = useCallback((value: string) => {
-    if (showFullHtml) {
-      htmlStructureRef.current = value;
-      debouncedSetHtmlStructure(value);
-    } else {
-      htmlCodeRef.current = value;
-      debouncedSetHtmlCode(value);
-    }
-  }, [showFullHtml]);
+    htmlRef.current = value;
+    debouncedSetHtmlCode(value);
+  }, []);
 
   const handleCssChange = useCallback((value: string) => {
     cssCodeRef.current = value;
@@ -76,10 +64,6 @@ export default function CodePlayground({
   const handleJsChange = useCallback((value: string) => {
     jsCodeRef.current = value;
     debouncedSetJsCode(value);
-  }, []);
-
-  const toggleFullHtml = useCallback(() => {
-    setShowFullHtml(prev => !prev);
   }, []);
 
   // Load content from clipboard
@@ -92,7 +76,7 @@ export default function CodePlayground({
           parsedData.CSS !== undefined && 
           parsedData.JS !== undefined) {
         // Update both refs and state
-        htmlCodeRef.current = parsedData.HTML;
+        htmlRef.current = parsedData.HTML;
         cssCodeRef.current = parsedData.CSS;
         jsCodeRef.current = parsedData.JS;
         
@@ -113,8 +97,8 @@ export default function CodePlayground({
     setCurrentExample(0);
     setMarkdownContent(introduction);
     
-    // Clear code editors for introduction but keep them visible
-    htmlCodeRef.current = '';
+    // Clear code editors for introduction
+    htmlRef.current = '';
     cssCodeRef.current = '';
     jsCodeRef.current = '';
     
@@ -139,8 +123,8 @@ export default function CodePlayground({
       // Going back to introduction
       setMarkdownContent(introduction || '');
       
-      // Clear code editors but keep them visible
-      htmlCodeRef.current = '';
+      // Clear code editors
+      htmlRef.current = '';
       cssCodeRef.current = '';
       jsCodeRef.current = '';
       
@@ -151,7 +135,7 @@ export default function CodePlayground({
       // Going to previous example
       const example = examples[prevIndex - 1];
       
-      htmlCodeRef.current = example.html || '';
+      htmlRef.current = example.html || '';
       cssCodeRef.current = example.css || '';
       jsCodeRef.current = example.javascript || '';
       
@@ -170,9 +154,8 @@ export default function CodePlayground({
     if (currentExample === 0) {
       // Moving from introduction to first example
       const example = examples[0];
-      setShowEditors(true);
       
-      htmlCodeRef.current = example.html || '';
+      htmlRef.current = example.html || '';
       cssCodeRef.current = example.css || '';
       jsCodeRef.current = example.javascript || '';
       
@@ -184,7 +167,7 @@ export default function CodePlayground({
       // Moving to next example
       const example = examples[nextIndex - 1];
       
-      htmlCodeRef.current = example.html || '';
+      htmlRef.current = example.html || '';
       cssCodeRef.current = example.css || '';
       jsCodeRef.current = example.javascript || '';
       
@@ -236,10 +219,8 @@ export default function CodePlayground({
             dragInterval={1}
           >
             <HtmlEditor 
-              code={showFullHtml ? htmlStructure : htmlCode}
+              code={htmlCode}
               onChange={handleHtmlChange}
-              showFullHtml={showFullHtml}
-              onToggleFullHtml={toggleFullHtml}
             />
             <CssEditor 
               code={cssCode}
@@ -302,12 +283,13 @@ export default function CodePlayground({
                   )}
                 </div>
               </div>
-              <PreviewPane 
-                htmlStructureRef={htmlStructureRef}
-                htmlCodeRef={htmlCodeRef}
-                cssCodeRef={cssCodeRef}
-                jsCodeRef={jsCodeRef}
-              />
+              <div className="flex-1 h-[calc(100%-40px)] overflow-hidden">
+                <PreviewPane 
+                  htmlRef={htmlRef}
+                  cssCodeRef={cssCodeRef}
+                  jsCodeRef={jsCodeRef}
+                />
+              </div>
             </div>
           </Split>
         </div>
